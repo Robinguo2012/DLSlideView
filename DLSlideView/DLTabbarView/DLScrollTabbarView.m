@@ -30,9 +30,11 @@
 @implementation DLScrollTabbarView{
     UIScrollView *scrollView_;
     UIImageView *trackView_;
+    BOOL hasLoad_;
 }
 
 - (void)commonInit{
+    hasLoad_ = NO;
     _selectedIndex = -1;
     
     scrollView_ = [[UIScrollView alloc] initWithFrame:self.bounds];
@@ -40,9 +42,17 @@
     [self addSubview:scrollView_];
     
     trackView_ = [[UIImageView alloc] initWithFrame:CGRectMake(0, self.bounds.size.height-kTrackViewHeight-1, self.bounds.size.width, kTrackViewHeight)];
+    trackView_.backgroundColor = [UIColor redColor];
     [scrollView_ addSubview:trackView_];
     trackView_.layer.cornerRadius = 2.0f;
     
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CALayer *bottomLayer = [[CALayer alloc] init];
+        bottomLayer.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.2].CGColor;
+        bottomLayer.frame = CGRectMake(0, self.frame.size.height - 1, self.frame.size.width, 1);
+        [self.layer addSublayer:bottomLayer];
+    });
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder{
@@ -92,16 +102,45 @@
 }
 
 - (void)setTabbarItems:(NSArray *)tabbarItems{
+    
+//    for (UIView *subview in scrollView_.subviews) {
+//        if ([subview isKindOfClass:[UIImageView class]]) {
+//            continue;
+//        }
+//        [subview removeFromSuperview];
+//    }
+    if (hasLoad_) {
+        for (int i=0; i<tabbarItems.count; i++) {
+            DLScrollTabbarItem *item = tabbarItems[i];
+    //        label.tag = kLabelTagBase+i;
+            UILabel *lab = [scrollView_ viewWithTag:kLabelTagBase+i];
+            if (lab) {
+                lab.text = item.title;
+                [lab sizeToFit];
+            }
+        }
+        return;
+    }
+    
+    
     if (_tabbarItems != tabbarItems) {
         _tabbarItems = tabbarItems;
 
         float height = self.bounds.size.height;
         float x = 0.0f;
+//        float x = self.bounds.size.width/2;
+        
+        NSMutableArray *tempArr = @[].mutableCopy;
+        
         NSInteger i=0;
         for (DLScrollTabbarItem *item in tabbarItems) {
             UIView *backView = [[UIView alloc] initWithFrame:CGRectMake(x, 0, item.width, height)];
+        
             backView.backgroundColor = [UIColor clearColor];
             backView.tag = kViewTagBase + i;
+            
+            [tempArr addObject:backView];
+            
             UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, item.width, height)];
             label.text = item.title;
             label.font = [UIFont systemFontOfSize:self.tabItemNormalFontSize];
@@ -109,9 +148,12 @@
             label.textColor = self.tabItemNormalColor;
             [label sizeToFit];
             label.tag = kLabelTagBase+i;
-
+            
             label.frame = CGRectMake((item.width-label.bounds.size.width)/2.0f, (height-label.bounds.size.height)/2.0f, CGRectGetWidth(label.bounds), CGRectGetHeight(label.bounds));
+            
             [backView addSubview:label];
+            
+            
             UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
             [backView addGestureRecognizer:tap];
 
@@ -119,10 +161,31 @@
             x += item.width;
             i++;
         }
+        
         scrollView_.contentSize = CGSizeMake(x, height);
+
+        // item 居中
+        if (x < self.bounds.size.width) {
+            scrollView_.contentSize = CGSizeMake(self.bounds.size.width, height);
+
+            UIView *preView = nil;
+            
+            for (int i=0; i<tempArr.count; i++) {
+                UIView *backView = tempArr[i];
+                DLScrollTabbarItem *item = tabbarItems[i];
+                if (i == 0) {
+                    CGFloat offsetX = (scrollView_.contentSize.width - x)/2;
+                    backView.frame = CGRectMake(offsetX, 0, item.width, height);
+                } else {
+                    backView.frame = CGRectMake(preView.frame.origin.x + preView.frame.size.width, 0, item.width, height);
+                }
+                preView = backView;
+            }
+        }
 
         [self layoutTabbar];
     }
+    hasLoad_ = YES;
 }
 
 - (void)layoutSubviews{

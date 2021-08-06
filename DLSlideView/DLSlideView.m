@@ -52,9 +52,6 @@
         [self switchTo:selectedIndex];
     }
 }
-//- (void)setViewControllers:(NSArray *)vcs{
-//    _viewControllers = vcs;
-//}
 
 - (void)removeOld{
     [self removeCtrl:oldCtrl_];
@@ -62,6 +59,7 @@
     oldCtrl_ = nil;
     oldIndex_ = -1;
 }
+
 - (void)removeWill{
     [willCtrl_ beginAppearanceTransition:NO animated:NO];
     [self removeCtrl:willCtrl_];
@@ -69,6 +67,7 @@
     willCtrl_ = nil;
     panToIndex_ = -1;
 }
+
 - (void)showAt:(NSInteger)index{
     if (oldIndex_ != index) {
         //[self removeAt:oldIndex_];
@@ -95,18 +94,6 @@
     [vc removeFromParentViewController];
 }
 
-//- (void)removeAt:(int)index{
-//    if (oldIndex_ == index) {
-//        oldIndex_ = -1;
-//    }
-//    
-//    if (index >= 0 && index <= [self.dataSource numberOfControllersInDLSlideView:self]) {
-//        UIViewController *vc = [self.dataSource DLSlideView:self controllerAt:index];
-//        [vc willMoveToParentViewController:nil];
-//        [vc.view removeFromSuperview];
-//        [vc removeFromParentViewController];
-//    }
-//}
 - (void)switchTo:(NSInteger)index{
     if (index == oldIndex_) {
         return;
@@ -182,17 +169,8 @@
     oldvc.view.frame = CGRectMake(self.bounds.origin.x + offsetx, self.bounds.origin.y, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
     
     if (panToIndex_ >= 0 && panToIndex_ < [self.dataSource numberOfControllersInDLSlideView:self]) {
-        //UIViewController *vc = [self.dataSource DLSlideView:self controllerAt:panToIndex_];
         UIViewController *vc = willCtrl_;
         vc.view.frame = CGRectMake(x, self.bounds.origin.y, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
-//        if (vc.parentViewController == nil) {
-//            
-//            [self.baseViewController addChildViewController:vc];
-//            [vc willMoveToParentViewController:self.baseViewController];
-//            [vc beginAppearanceTransition:YES animated:YES];
-//            [self addSubview:vc.view];
-//            //[vc didMoveToParentViewController:self.baseViewController];
-//        }
     }
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(DLSlideView:switchingFrom:to:percent:)]) {
@@ -204,7 +182,6 @@
     NSTimeInterval animatedTime = 0;
     animatedTime = 0.3;
     
-    //animatedTime = fabs(self.frame.size.width - fabs(offsetx)) / self.frame.size.width * 0.35;
     [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
     [UIView animateWithDuration:animatedTime animations:^{
         [self repositionForOffsetX:0];
@@ -219,32 +196,8 @@
             [self.delegate DLSlideView:self switchCanceled:oldIndex_];
         }
     }];
-    
-//    [UIView animateWithDuration:animatedTime delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-//        float pantox = 0.0f;
-//        if (offsetx > 0) {
-//            pantox = -self.bounds.size.width;
-//        }
-//        else{
-//            pantox = self.bounds.size.width;
-//        }
-//        
-//        //UIViewController *oldvc = [self.dataSource DLSlideView:self controllerAt:oldIndex_];;
-//        UIViewController *oldvc = oldCtrl_;
-//        oldvc.view.frame = CGRectMake(0, self.bounds.origin.y, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
-//        if (panToIndex_ >= 0 && panToIndex_ < [self.dataSource numberOfControllersInDLSlideView:self]) {
-//            //UIViewController *vc = [self.dataSource DLSlideView:self controllerAt:panToIndex_];
-//            UIViewController *vc = willCtrl_;
-//            vc.view.frame = CGRectMake(pantox, self.bounds.origin.y, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds));
-//        }
-//    } completion:^(BOOL finished) {
-//        if (panToIndex_ >= 0 && panToIndex_ < [self.dataSource numberOfControllersInDLSlideView:self] && panToIndex_ != oldIndex_) {
-//            //[self removeAt:panToIndex_];
-//            [self removeWill];
-//        }
-//    }];
-    
 }
+
 - (void)panHandler:(UIPanGestureRecognizer *)pan{
     if (oldIndex_ < 0) {
         return;
@@ -264,7 +217,7 @@
         if (offsetx > 0) {
             panToIndex = oldIndex_ - 1;
         }
-        else if(offsetx < 0){
+        else if(offsetx < 0) {
             panToIndex = oldIndex_ + 1;
         }
         

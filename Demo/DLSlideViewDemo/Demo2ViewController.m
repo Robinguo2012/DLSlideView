@@ -44,6 +44,7 @@
     self.slideView.tabbarBottomSpacing = 5;
     self.slideView.baseViewController = self;
     [self.slideView setup];
+    
     self.slideView.selectedIndex = 0;
 }
 
@@ -57,6 +58,7 @@
 }
 
 - (UIViewController *)DLCustomSlideView:(DLCustomSlideView *)sender controllerAt:(NSInteger)index{
+    
     PageNViewController *ctrl = [[PageNViewController alloc] init];
     int32_t rgbValue = rand();
     ctrl.view.backgroundColor = [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];

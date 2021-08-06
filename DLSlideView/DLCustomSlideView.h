@@ -19,6 +19,7 @@
 @protocol DLCustomSlideViewDelegate <NSObject>
 - (NSInteger)numberOfTabsInDLCustomSlideView:(DLCustomSlideView *)sender;
 - (UIViewController *)DLCustomSlideView:(DLCustomSlideView *)sender controllerAt:(NSInteger)index;
+
 @optional
 - (void)DLCustomSlideView:(DLCustomSlideView *)sender didSelectedAt:(NSInteger)index;
 @end
